@@ -1,8 +1,11 @@
 package com.web.scraper.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "products")
@@ -13,20 +16,28 @@ public class Product {
 	private Long id;
 	@Column(name = "price")
 	private String price;
-	@ElementCollection
-	private List<String> availableColors;
 	@Column(name = "name")
 	private String name;
 	@Column(name = "url")
 	private String url;
+	@Column(name = "keyword")
+	private String keyword;
+	@ManyToMany
+	@JoinTable(
+			name = "product_color",
+			joinColumns = @JoinColumn(name = "product_id"),
+			inverseJoinColumns = @JoinColumn(name = "color_id")
+	)
+	@JsonManagedReference
+	private Set<AvailableColor> availableColors = new HashSet<>();
 
 	public Product() {}
 
-	public Product(String price, List<String> availableColors, String name, String url) {
+	public Product(String price, String name, String url, String keyword) {
 		this.price = price;
-		this.availableColors = availableColors;
 		this.name = name;
 		this.url = url;
+		this.keyword = keyword;
 	}
 
 	public Long getId() {
@@ -37,22 +48,6 @@ public class Product {
 		this.id = id;
 	}
 
-	public String getPrice() {
-		return price;
-	}
-
-	public void setPrice(String price) {
-		this.price = price;
-	}
-
-	public List<String> getAvailableColors() {
-		return availableColors;
-	}
-
-	public void setAvailableColors(List<String> availableColors) {
-		this.availableColors = availableColors;
-	}
-
 	public String getName() {
 		return name;
 	}
@@ -61,11 +56,35 @@ public class Product {
 		this.name = name;
 	}
 
+	public String getPrice() {
+		return price;
+	}
+
+	public void setPrice(String price) {
+		this.price = price;
+	}
+
 	public String getUrl() {
 		return url;
 	}
 
 	public void setUrl(String url) {
 		this.url = url;
+	}
+
+	public Set<AvailableColor> getAvailableColors() {
+		return availableColors;
+	}
+
+	public void setAvailableColors(Set<AvailableColor> availableColors) {
+		this.availableColors = availableColors;
+	}
+
+	public String getKeyword() {
+		return keyword;
+	}
+
+	public void setKeyword(String keyword) {
+		this.keyword = keyword;
 	}
 }

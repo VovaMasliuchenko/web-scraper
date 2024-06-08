@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @CrossOrigin(origins = "http://localhost:8081")
 @RestController
 @RequestMapping("/api/scraper")
@@ -21,10 +23,10 @@ public class ScraperController {
 
 	@CrossOrigin(origins = "http://localhost:3000")
 	@GetMapping("/product")
-	public ResponseEntity<Product> scrapeProduct(@RequestParam("productName") String productName) {
+	public ResponseEntity<List<Product>> scrapeProduct(@RequestParam("productName") String productName) {
 		try {
-			Product product = scraperService.scrapeProduct(productName);
-			return new ResponseEntity<>(product, HttpStatus.OK);
+			List<Product> productList = scraperService.scrapeProduct(productName);
+			return new ResponseEntity<>(productList, HttpStatus.OK);
 		} catch (Exception e) {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
