@@ -51,8 +51,6 @@ public class ScraperService {
                 WebElement searchButton = webDriver.findElement(By.xpath("//button[@class='_cvO7u1']"));
                 searchButton.click();
 
-                switch (productName) {
-                    case "Керамічна плитка та керамограніт":
                         List<String> productLinks = webDriver.findElements(By.xpath("//li[@data-test-small-card]//div/a"))
                                 .stream()
                                 .limit(10)
@@ -74,10 +72,6 @@ public class ScraperService {
                             System.out.println(webDriver.getCurrentUrl());
 
                             List<WebElement> colorElements;
-
-                            if (productNameFromPage.equals("Плитка Allore Group Altero Gold W P NR Satin 31x61x7 см")) {
-                                System.out.println();
-                            }
 
                             try {
                                 colorElements = webDriver.findElements(By.xpath("//a/div[@class='_mcvk-l _gBdcpi']"));
@@ -107,53 +101,6 @@ public class ScraperService {
                             product.setAvailableColors(availableColors);
                             productList.add(product);
                         }
-                        break;
-//                    case "фарба гумова":
-//                        Thread.sleep(2000);
-//                        webDriver.findElement(By.xpath("//li[@data-test-small-card='1']//a")).click();
-//
-//                        Thread.sleep(2000);
-//                        product.setPrice(webDriver.findElement(By.xpath("(//div[@class='_tqVytn _Bfr6tl'])[1]")).getText());
-//                        webDriver.findElement(By.xpath("//div[@class='_swH4z2 _9j7it0 _M8Ya-E']")).click();
-//                        List<WebElement> paintColorElements = webDriver.findElements(By.xpath("//div[@class='_MS10aN']"));
-//                        Set<AvailableColor> paintAvailableColors = new HashSet<>();
-//                        for (WebElement colorElement:
-//                                paintColorElements) {
-//                            String style = colorElement.getAttribute("style");
-//                            int begin = style.indexOf(':');
-//                            int end = style.indexOf(';');
-//                            String color = style.substring(begin + 2, end);
-//
-//                            AvailableColor availableColor = availableColorRepository.findByColor(color)
-//                                    .orElseGet(() -> availableColorRepository.save(new AvailableColor(color)));
-//                            paintAvailableColors.add(availableColor);
-//                        }
-//                        product.setAvailableColors(paintAvailableColors);
-//                        product.setName(webDriver.findElement(By.xpath("//h1")).getText());
-//                        product.setUrl(webDriver.getCurrentUrl());
-//                        break;
-//                    case "ламінат":
-//                        Thread.sleep(2000);
-//                        webDriver.findElement(By.xpath("//li[@data-test-small-card='1']//a")).click();
-//
-//                        Thread.sleep(2000);
-//                        product.setPrice(webDriver.findElement(By.xpath("(//div[@class='_tqVytn _Bfr6tl'])[1]")).getText());
-//                        List<WebElement> floorColorElements = webDriver.findElements(By.xpath("//ul[@class='_hUaBPO']/li//img"));
-//                        Set<AvailableColor> floorAvailableColors = new HashSet<>();
-//                        for (WebElement colorElement:
-//                                floorColorElements) {
-//                            String src = colorElement.getAttribute("src");
-//
-//                            AvailableColor availableColor = availableColorRepository.findByColor(src)
-//                                    .orElseGet(() -> availableColorRepository.save(new AvailableColor(src)));
-//                            floorAvailableColors.add(availableColor);
-//                        }
-//                        product.setAvailableColors(floorAvailableColors);
-//                        product.setName(webDriver.findElement(By.xpath("//h1")).getText());
-//                        product.setUrl(webDriver.getCurrentUrl());
-//                        break;
-                }
-
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
