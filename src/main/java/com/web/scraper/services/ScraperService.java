@@ -69,7 +69,6 @@ public class ScraperService {
                             product.setName(productNameFromPage);
                             product.setPrice(webDriver.findElement(By.xpath("(//div[contains(@class, '_tqVytn')])[1]")).getText());
                             product.setUrl(webDriver.getCurrentUrl());
-                            System.out.println(webDriver.getCurrentUrl());
 
                             List<WebElement> colorElements;
 
