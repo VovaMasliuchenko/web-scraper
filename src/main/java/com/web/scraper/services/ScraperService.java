@@ -146,24 +146,6 @@ public class ScraperService {
             product.setRating(rating == 0 ? 3 : rating);
             product.setLastUpdated(calendar.getTime());
 
-//            product.setUrl(webDriver.getCurrentUrl());
-
-//            List<WebElement> colorElements = webDriver.findElements(By.xpath("//a/div[@class='_mcvk-l _gBdcpi'] | (//div[@class='swiper-zoom-container _xc4kSC']/img)[1]"));
-//            Set<AvailableColor> availableColors = new HashSet<>();
-//            for (WebElement colorElement : colorElements) {
-//                wait.until(attributeToBeNotEmpty(colorElement, "style", "src"));
-//                String color;
-//                if (colorElement.getAttribute("style").equals("")) {
-//                    color = colorElement.getAttribute("href");
-//                } else {
-//                    String style = colorElement.getAttribute("style");
-//                    int begin = style.indexOf('"');
-//                    int end = style.indexOf('"', begin + 1);
-//                    color = style.substring(begin + 1, end);
-//                }
-//                availableColors.add(new AvailableColor(color));
-//            }
-//            product.setAvailableColors(availableColors);
             productRepository.save(product);
 
         } catch (Exception e) {
@@ -176,7 +158,7 @@ public class ScraperService {
 
     private boolean wasUpdatedInLast24Hours(Date lastUpdated) {
         Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.MINUTE, -5);
+        calendar.add(Calendar.HOUR, -24);
         Date twentyFourHoursAgo = calendar.getTime();
         return lastUpdated.after(twentyFourHoursAgo);
     }
