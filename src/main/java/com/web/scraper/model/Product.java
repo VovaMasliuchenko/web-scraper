@@ -3,8 +3,9 @@ package com.web.scraper.model;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -18,10 +19,15 @@ public class Product {
 	private String price;
 	@Column(name = "name")
 	private String name;
+	@Column(name = "rating")
+	private int rating;
 	@Column(name = "url")
 	private String url;
 	@Column(name = "keyword")
 	private String keyword;
+	@Column(name = "last_updated")
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date lastUpdated;
 	@ManyToMany
 	@JoinTable(
 			name = "product_color",
@@ -31,13 +37,17 @@ public class Product {
 	@JsonManagedReference
 	private Set<AvailableColor> availableColors = new HashSet<>();
 
-	public Product() {}
+	public Product() {
+		this.lastUpdated = Calendar.getInstance().getTime();
+	}
 
-	public Product(String price, String name, String url, String keyword) {
+	public Product(String price, String name, int rating, String url, String keyword) {
 		this.price = price;
 		this.name = name;
+		this.rating = rating;
 		this.url = url;
 		this.keyword = keyword;
+		this.lastUpdated = Calendar.getInstance().getTime();
 	}
 
 	public Long getId() {
@@ -54,6 +64,14 @@ public class Product {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public int getRating() {
+		return rating;
+	}
+
+	public void setRating(int rating) {
+		this.rating = rating;
 	}
 
 	public String getPrice() {
@@ -86,5 +104,13 @@ public class Product {
 
 	public void setKeyword(String keyword) {
 		this.keyword = keyword;
+	}
+
+	public Date getLastUpdated() {
+		return lastUpdated;
+	}
+
+	public void setLastUpdated(Date lastUpdated) {
+		this.lastUpdated = lastUpdated;
 	}
 }
