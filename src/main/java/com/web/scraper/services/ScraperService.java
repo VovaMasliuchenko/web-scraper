@@ -17,10 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,7 +36,7 @@ public class ScraperService {
 
     public List<Product> scrapeProduct(String productName) {
         List<Product> productList = productRepository.findByKeyword(productName);
-        if (productList.isEmpty() || productList.size() < 10) {
+        if (productList.isEmpty() || productList.size() < 20) {
             WebDriver webDriver = new ChromeDriver(chromeOptions);
             WebDriverWait wait = new WebDriverWait(webDriver, Duration.ofSeconds(10));
             try {
@@ -53,7 +50,7 @@ public class ScraperService {
 
                         List<String> productLinks = webDriver.findElements(By.xpath("//li[@data-test-small-card]//div/a"))
                                 .stream()
-                                .limit(10)
+                                .limit(20)
                                 .map(webElement -> webElement.getAttribute("href"))
                                 .toList();
                         for (String productLink : productLinks) {
@@ -69,6 +66,16 @@ public class ScraperService {
                             product.setName(productNameFromPage);
                             product.setPrice(webDriver.findElement(By.xpath("(//div[contains(@class, '_tqVytn')])[1]")).getText());
                             product.setUrl(webDriver.getCurrentUrl());
+
+                            List<WebElement> starElements = webDriver.findElements(By.xpath("//div[@class='_tpM6VY _OMtODJ _oZRAns']//div[@class='_H03nLI _DlcWBu']"));
+                            int rating = 0;
+                            for (WebElement starElement : starElements) {
+                                String style = starElement.getAttribute("style");
+                                if (style != null && style.contains("rgb(255, 195, 66)")) {
+                                    rating++;
+                                }
+                            }
+                            product.setRating(rating == 0 ? 3 : rating); // за замовчуванням рейтинг 3 якщо нема відгуків
 
                             List<WebElement> colorElements;
 
@@ -111,6 +118,67 @@ public class ScraperService {
             System.out.println("Product list already contains sufficient items or products for the given name.");
         }
         return productList;
+    }
+
+    public Product updateProduct(Product product) {
+        if (product.getLastUpdated() != null && wasUpdatedInLast24Hours(product.getLastUpdated())) {
+            System.out.println("Product was updated in the last 24 hours. Skipping update.");
+            return product;
+        }
+        Calendar calendar = Calendar.getInstance();
+        WebDriver webDriver = new ChromeDriver(chromeOptions);
+        WebDriverWait wait = new WebDriverWait(webDriver, Duration.ofSeconds(10));
+        try {
+            webDriver.navigate().to(product.getUrl());
+            Thread.sleep(2000);
+            String productNameFromPage = webDriver.findElement(By.xpath("//h1")).getText();
+            WebElement priceElement = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("(//div[contains(@class, '_tqVytn')])[1]")));
+            product.setName(productNameFromPage);
+            product.setPrice(priceElement.getText());
+            List<WebElement> starElements = webDriver.findElements(By.xpath("//div[@class='_tpM6VY _OMtODJ _oZRAns']//div[@class='_H03nLI _DlcWBu']"));
+            int rating = 0;
+            for (WebElement starElement : starElements) {
+                String style = starElement.getAttribute("style");
+                if (style != null && style.contains("rgb(255, 195, 66)")) {
+                    rating++;
+                }
+            }
+            product.setRating(rating == 0 ? 3 : rating);
+            product.setLastUpdated(calendar.getTime());
+
+//            product.setUrl(webDriver.getCurrentUrl());
+
+//            List<WebElement> colorElements = webDriver.findElements(By.xpath("//a/div[@class='_mcvk-l _gBdcpi'] | (//div[@class='swiper-zoom-container _xc4kSC']/img)[1]"));
+//            Set<AvailableColor> availableColors = new HashSet<>();
+//            for (WebElement colorElement : colorElements) {
+//                wait.until(attributeToBeNotEmpty(colorElement, "style", "src"));
+//                String color;
+//                if (colorElement.getAttribute("style").equals("")) {
+//                    color = colorElement.getAttribute("href");
+//                } else {
+//                    String style = colorElement.getAttribute("style");
+//                    int begin = style.indexOf('"');
+//                    int end = style.indexOf('"', begin + 1);
+//                    color = style.substring(begin + 1, end);
+//                }
+//                availableColors.add(new AvailableColor(color));
+//            }
+//            product.setAvailableColors(availableColors);
+            productRepository.save(product);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            webDriver.quit();
+        }
+        return product;
+    }
+
+    private boolean wasUpdatedInLast24Hours(Date lastUpdated) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.MINUTE, -5);
+        Date twentyFourHoursAgo = calendar.getTime();
+        return lastUpdated.after(twentyFourHoursAgo);
     }
 
     private ExpectedCondition<Boolean> attributeToBeNotEmpty(final WebElement element, final String attribute1, final String attribute2) {
