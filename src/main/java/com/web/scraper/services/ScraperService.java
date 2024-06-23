@@ -35,8 +35,9 @@ public class ScraperService {
     }
 
     public List<Product> scrapeProduct(String productName) {
+        int pageCount = 10;
         List<Product> productList = productRepository.findByKeyword(productName);
-        if (productList.isEmpty() || productList.size() < 20) {
+        if (productList.isEmpty() || productList.size() < 100) {
             WebDriver webDriver = new ChromeDriver(chromeOptions);
             WebDriverWait wait = new WebDriverWait(webDriver, Duration.ofSeconds(10));
             try {
@@ -47,12 +48,15 @@ public class ScraperService {
 
                 WebElement searchButton = webDriver.findElement(By.xpath("//button[@class='_cvO7u1']"));
                 searchButton.click();
-
-                        List<String> productLinks = webDriver.findElements(By.xpath("//li[@data-test-small-card]//div/a"))
-                                .stream()
-                                .limit(20)
-                                .map(webElement -> webElement.getAttribute("href"))
-                                .toList();
+                List<String> productLinks = new ArrayList<>();
+                for (int i = 0; i < pageCount; i++) {
+                    productLinks.addAll(webDriver.findElements(By.xpath("//li[@data-test-small-card]//div/a"))
+                            .stream()
+                            .map(webElement -> webElement.getAttribute("href"))
+                            .toList());
+                    webDriver.findElement(By.xpath("//a[@title='наступна сторінка']")).click();
+                    Thread.sleep(5000);
+                }
                         for (String productLink : productLinks) {
                             webDriver.navigate().to(productLink);
                             Thread.sleep(2000);

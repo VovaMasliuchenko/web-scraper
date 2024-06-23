@@ -24,6 +24,10 @@ public class ProductService {
         this.productRepository = productRepository;
     }
 
+    public List<Product> getAllProducts() {
+        return productRepository.findAll();
+    }
+
     public List<Product> getProductsInCluster(int clusterId, String productKeyword, String... parameters) {
         List<Product> allProducts = productRepository.findByKeyword(productKeyword);
         List<CentroidCluster<ProductClusterable>> clusters = clusteringService.performClustering(allProducts, 3, parameters);
